@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -23,7 +24,7 @@
             margin: 0 auto;
             background: white;
             border-radius: 15px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             overflow: hidden;
         }
 
@@ -51,7 +52,8 @@
             padding: 30px;
         }
 
-        .input-section, .output-section {
+        .input-section,
+        .output-section {
             display: flex;
             flex-direction: column;
             gap: 15px;
@@ -65,13 +67,16 @@
 
         textarea {
             width: 100%;
-            height: 400px;
+            height: 600px;
             padding: 15px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
             font-family: 'Courier New', monospace;
             font-size: 12px;
-            resize: vertical;
+            resize: both;
+            min-height: 300px;
+            max-height: 900px;
+            overflow: auto;
             transition: border-color 0.3s;
         }
 
@@ -122,7 +127,8 @@
             border-radius: 8px;
             padding: 20px;
             background: white;
-            min-height: 400px;
+            min-height: 600px;
+            max-height: 900px;
             overflow: auto;
         }
 
@@ -210,7 +216,7 @@
             .content {
                 grid-template-columns: 1fr;
             }
-            
+
             .controls {
                 grid-template-columns: 1fr;
             }
@@ -224,6 +230,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
@@ -347,7 +354,7 @@
         // Download as JPG
         function downloadJPG() {
             const input = document.getElementById('asciiInput').value;
-            
+
             if (!input.trim()) {
                 showStatus('Please enter some text first!', 'error');
                 return;
@@ -355,7 +362,7 @@
 
             const canvas = document.getElementById('canvas');
             const ctx = canvas.getContext('2d');
-            
+
             // Get settings
             const fontSize = parseInt(document.getElementById('fontSize').value);
             const textColor = document.getElementById('textColor').value;
@@ -366,11 +373,11 @@
 
             // Set font for measurement
             ctx.font = `${fontSize}px ${fontFamily}`;
-            
+
             // Calculate dimensions
             const lines = input.split('\n');
             let maxWidth = 0;
-            
+
             lines.forEach(line => {
                 const width = ctx.measureText(line).width;
                 if (width > maxWidth) maxWidth = width;
@@ -407,7 +414,7 @@
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-                
+
                 showStatus('Download started! Check your downloads folder.', 'success');
             }, 'image/jpeg', quality);
         }
@@ -418,7 +425,7 @@
             status.textContent = message;
             status.className = `status ${type}`;
             status.style.display = 'block';
-            
+
             setTimeout(() => {
                 status.style.display = 'none';
             }, 3000);
@@ -435,4 +442,5 @@
         updatePreview();
     </script>
 </body>
+
 </html>
