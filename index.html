@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASCII Art to JPG Converter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 30px;
+        }
+
+        .input-section, .output-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        h2 {
+            color: #667eea;
+            font-size: 1.3em;
+            margin-bottom: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 400px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-group label {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9em;
+        }
+
+        .control-group input[type="number"],
+        .control-group input[type="color"],
+        .control-group select {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .control-group input:focus,
+        .control-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .preview-box {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            background: white;
+            min-height: 400px;
+            overflow: auto;
+        }
+
+        #preview {
+            font-family: 'Courier New', monospace;
+            white-space: pre;
+            line-height: 1.2;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        button {
+            flex: 1;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        canvas {
+            display: none;
+        }
+
+        .status {
+            text-align: center;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 ASCII Art to JPG Converter</h1>
+            <p>Convert your text diagrams and ASCII art to high-quality JPG images</p>
+        </div>
+
+        <div class="content">
+            <!-- Input Section -->
+            <div class="input-section">
+                <h2>📝 Input Your ASCII Art</h2>
+                <textarea id="asciiInput" placeholder="Paste your ASCII art or text diagram here...">┌─────────────────────────────────────────────────────────────────────────────┐
+│                        CIRCULAR ECONOMY MODEL                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   WOOD PROCESSING INDUSTRY                                                  │
+│          ↓                                                                  │
+│   SAWDUST (Waste) ─────────────→ PRE-TREATMENT                              │
+│          │                            ↓                                     │
+│          │                      HYDROLYSIS                                  │
+│          │                            ↓                                     │
+│          │                      FERMENTATION                                │
+│          │                            ↓                                     │
+│          │                      BIO-ETHANOL ───→ TRANSPORTATION FUEL        │
+│          │                            │                                     │
+│          │                      RESIDUE (Lignin)                            │
+│          │                            ↓                                     │
+│          └──────────── SOLID FUEL / COMPOSTING / BIOCHAR                    │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘</textarea>
+
+                <div class="controls">
+                    <div class="control-group">
+                        <label for="fontSize">Font Size (px)</label>
+                        <input type="number" id="fontSize" value="14" min="8" max="30">
+                    </div>
+                    <div class="control-group">
+                        <label for="textColor">Text Color</label>
+                        <input type="color" id="textColor" value="#000000">
+                    </div>
+                    <div class="control-group">
+                        <label for="bgColor">Background Color</label>
+                        <input type="color" id="bgColor" value="#ffffff">
+                    </div>
+                    <div class="control-group">
+                        <label for="padding">Padding (px)</label>
+                        <input type="number" id="padding" value="30" min="10" max="100">
+                    </div>
+                    <div class="control-group">
+                        <label for="quality">JPG Quality</label>
+                        <select id="quality">
+                            <option value="0.6">Standard (60%)</option>
+                            <option value="0.8" selected>High (80%)</option>
+                            <option value="0.9">Very High (90%)</option>
+                            <option value="1.0">Maximum (100%)</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="fontFamily">Font Family</label>
+                        <select id="fontFamily">
+                            <option value="Courier New">Courier New</option>
+                            <option value="Monaco">Monaco</option>
+                            <option value="Consolas">Consolas</option>
+                            <option value="monospace">Monospace</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="updatePreview()">👁️ Preview</button>
+                    <button class="btn-secondary" onclick="clearAll()">🗑️ Clear</button>
+                </div>
+            </div>
+
+            <!-- Output Section -->
+            <div class="output-section">
+                <h2>👀 Preview & Export</h2>
+                <div class="preview-box">
+                    <div id="preview"></div>
+                </div>
+
+                <div id="status" class="status"></div>
+
+                <button class="btn-success" onclick="downloadJPG()">⬇️ Download as JPG</button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Made for converting ASCII art, text diagrams, and flowcharts to images | &copy; 2026</p>
+        </div>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <script>
+        // Update preview in real-time
+        function updatePreview() {
+            const input = document.getElementById('asciiInput').value;
+            const preview = document.getElementById('preview');
+            const fontSize = document.getElementById('fontSize').value;
+            const textColor = document.getElementById('textColor').value;
+            const bgColor = document.getElementById('bgColor').value;
+            const fontFamily = document.getElementById('fontFamily').value;
+
+            preview.textContent = input;
+            preview.style.fontSize = fontSize + 'px';
+            preview.style.color = textColor;
+            preview.style.fontFamily = fontFamily;
+            preview.parentElement.style.backgroundColor = bgColor;
+
+            showStatus('Preview updated!', 'success');
+        }
+
+        // Clear all inputs
+        function clearAll() {
+            document.getElementById('asciiInput').value = '';
+            document.getElementById('preview').textContent = '';
+            showStatus('Cleared!', 'success');
+        }
+
+        // Download as JPG
+        function downloadJPG() {
+            const input = document.getElementById('asciiInput').value;
+            
+            if (!input.trim()) {
+                showStatus('Please enter some text first!', 'error');
+                return;
+            }
+
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Get settings
+            const fontSize = parseInt(document.getElementById('fontSize').value);
+            const textColor = document.getElementById('textColor').value;
+            const bgColor = document.getElementById('bgColor').value;
+            const padding = parseInt(document.getElementById('padding').value);
+            const quality = parseFloat(document.getElementById('quality').value);
+            const fontFamily = document.getElementById('fontFamily').value;
+
+            // Set font for measurement
+            ctx.font = `${fontSize}px ${fontFamily}`;
+            
+            // Calculate dimensions
+            const lines = input.split('\n');
+            let maxWidth = 0;
+            
+            lines.forEach(line => {
+                const width = ctx.measureText(line).width;
+                if (width > maxWidth) maxWidth = width;
+            });
+
+            const lineHeight = fontSize * 1.2;
+            const canvasWidth = maxWidth + (padding * 2);
+            const canvasHeight = (lines.length * lineHeight) + (padding * 2);
+
+            // Set canvas size
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+
+            // Fill background
+            ctx.fillStyle = bgColor;
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+            // Draw text
+            ctx.fillStyle = textColor;
+            ctx.font = `${fontSize}px ${fontFamily}`;
+            ctx.textBaseline = 'top';
+
+            lines.forEach((line, index) => {
+                ctx.fillText(line, padding, padding + (index * lineHeight));
+            });
+
+            // Convert to JPG and download
+            canvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `ascii-diagram-${Date.now()}.jpg`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showStatus('Download started! Check your downloads folder.', 'success');
+            }, 'image/jpeg', quality);
+        }
+
+        // Show status message
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+            
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 3000);
+        }
+
+        // Auto-update preview on input
+        document.getElementById('asciiInput').addEventListener('input', updatePreview);
+        document.getElementById('fontSize').addEventListener('change', updatePreview);
+        document.getElementById('textColor').addEventListener('change', updatePreview);
+        document.getElementById('bgColor').addEventListener('change', updatePreview);
+        document.getElementById('fontFamily').addEventListener('change', updatePreview);
+
+        // Initial preview
+        updatePreview();
+    </script>
+</body>
+</html>
